@@ -1,6 +1,6 @@
 # P3PrecacheIncrease
 
-As the name suggests, this project increases the precaching limits within Postal III's engine. Who's values are based on Source Engine 2007, as can be found within it's leaked engine code.
+As the name suggests, this project increases the precaching limits within Postal III's engine. Whose values are based on Source Engine 2007, as can be found within it's leaked engine code.
 This code is meant to be put alongside a .VDF file in addons folder, or injected with LoadLibrary in a custom `P3.exe` or `client.dll`.
 
 Values are increased to:
