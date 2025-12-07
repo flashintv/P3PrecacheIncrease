@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\sdk">
+      <UniqueIdentifier>{a3b70556-0617-4a1a-927a-5aa8bd6b644d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sdk">
+      <UniqueIdentifier>{83706024-3ee7-44e7-8557-09e5294ef86d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sourcemod">
+      <UniqueIdentifier>{8da53b37-2db4-4c2b-a2b5-ff93a0b38700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\p3">
+      <UniqueIdentifier>{31efbf69-18aa-41f7-9f8a-a2b626d5e328}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\p3">
+      <UniqueIdentifier>{d40ec2a1-f866-4fdb-b20b-5307c8284da6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\minhook">
+      <UniqueIdentifier>{14451eba-b157-47c1-8345-08312193c00d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sdk\IServerPlugin.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\dbg.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\precache.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\networkstringtabledefs.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sourcemod\sigscan.h">
+      <Filter>Header Files\sourcemod</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\icommandline.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\modelloader.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\ienginereplay.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="p3\mapreslistgenerator.h">
+      <Filter>Header Files\p3</Filter>
+    </ClInclude>
+    <ClInclude Include="p3\common.h">
+      <Filter>Header Files\p3</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\ienginevgui.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\vgui_baseui_interface.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\icvar.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\iconvar.h">
+      <Filter>Header Files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="minhook\MinHook.h">
+      <Filter>Header Files\minhook</Filter>
+    </ClInclude>
+    <ClInclude Include="minhook\MinHookEx.h">
+      <Filter>Header Files\minhook</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="p3precacheincrease_plugin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk\interface.cpp">
+      <Filter>Source Files\sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="sourcemod\sigscan.cpp">
+      <Filter>Header Files\sourcemod</Filter>
+    </ClCompile>
+    <ClCompile Include="p3\mapreslistgenerator.cpp">
+      <Filter>Source Files\p3</Filter>
+    </ClCompile>
+    <ClCompile Include="p3\common.cpp">
+      <Filter>Source Files\p3</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
