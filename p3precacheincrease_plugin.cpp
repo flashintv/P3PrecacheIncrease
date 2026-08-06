@@ -24,50 +24,64 @@ IModelLoader* modelloader = nullptr;
 IEngineVGuiInternal* enginevgui = nullptr;
 ICvar* cvar = nullptr;
 
-void(__cdecl* Host_Disconnect)(bool bShowMainMenu);
+void( __cdecl* Host_Disconnect )(bool bShowMainMenu);
 
-CSfxTable*(__cdecl* S_PrecacheSound)(const char* name);
+CSfxTable* (__cdecl* S_PrecacheSound)(const char* name);
+
+// Not touched
+#define MAX_GENERIC 512
+#define MAX_DECALS 512
+
+// Original values
+#define OLD_MAX_MODELS 1024
+#define OLD_MAX_SOUND_INDEX_BITS 13
+#define OLD_MAX_SOUNDS (1 << OLD_MAX_SOUND_INDEX_BITS) // 8192
+
+// Edited values
+#define MAX_MODELS 4096
+#define MAX_SOUND_INDEX_BITS 14
+#define MAX_SOUNDS (1 << MAX_SOUND_INDEX_BITS) // 16384
 
 //---------------------------------------------------------------------------------
 // Purpose: a sample 3rd party plugin class
 //---------------------------------------------------------------------------------
-class CEmptyServerPlugin: public IServerPluginCallbacks
+class CEmptyServerPlugin : public IServerPluginCallbacks
 {
 public:
 	CEmptyServerPlugin() {}
 	~CEmptyServerPlugin() {}
 
 	// IServerPluginCallbacks methods
-	virtual bool			Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory);
-	virtual void			Unload(void);
-	virtual void			Pause(void) {}
-	virtual void			UnPause(void) {}
-	virtual const char*		GetPluginDescription(void) { return "P3IncreasePrecache - Increases precache limits and stringtable limits in Postal 3. (By Grizzle)"; }
-	virtual void			LevelInit(char const* pMapName) {}
-	virtual void			ServerActivate(void* pEdictList, int edictCount, int clientMax) {}
-	virtual void			GameFrame(bool simulating) {}
-	virtual void			LevelShutdown(void) {}
-	virtual void			ClientActive(void* pEntity) {}
-	virtual void			ClientDisconnect(void* pEntity) {}
-	virtual void			ClientPutInServer(void* pEntity, char const* playername) {}
-	virtual void			SetCommandClient(int index) {}
-	virtual void			ClientSettingsChanged(void* pEdict) {}
-	virtual PLUGIN_RESULT	ClientConnect(bool* bAllowConnect, void* pEntity, const char* pszName, const char* pszAddress, char* reject, int maxrejectlen) { return PLUGIN_CONTINUE; }
-	virtual PLUGIN_RESULT	ClientCommand(void* pEntity, const CCommand& args) { return PLUGIN_CONTINUE; }
-	virtual PLUGIN_RESULT	NetworkIDValidated(const char* pszUserName, const char* pszNetworkID) { return PLUGIN_CONTINUE; }
-	virtual void			OnQueryCvarValueFinished(QueryCvarCookie_t iCookie, void* pPlayerEntity, EQueryCvarValueStatus eStatus, const char* pCvarName, const char* pCvarValue) {}
+	virtual bool			Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory );
+	virtual void			Unload( void );
+	virtual void			Pause( void ) {}
+	virtual void			UnPause( void ) {}
+	virtual const char* GetPluginDescription( void ) { return "P3IncreasePrecache - Increases precache limits and stringtable limits in Postal 3. (By Grizzle)"; }
+	virtual void			LevelInit( char const* pMapName ) {}
+	virtual void			ServerActivate( void* pEdictList, int edictCount, int clientMax ) {}
+	virtual void			GameFrame( bool simulating ) {}
+	virtual void			LevelShutdown( void ) {}
+	virtual void			ClientActive( void* pEntity ) {}
+	virtual void			ClientDisconnect( void* pEntity ) {}
+	virtual void			ClientPutInServer( void* pEntity, char const* playername ) {}
+	virtual void			SetCommandClient( int index ) {}
+	virtual void			ClientSettingsChanged( void* pEdict ) {}
+	virtual PLUGIN_RESULT	ClientConnect( bool* bAllowConnect, void* pEntity, const char* pszName, const char* pszAddress, char* reject, int maxrejectlen ) { return PLUGIN_CONTINUE; }
+	virtual PLUGIN_RESULT	ClientCommand( void* pEntity, const CCommand& args ) { return PLUGIN_CONTINUE; }
+	virtual PLUGIN_RESULT	NetworkIDValidated( const char* pszUserName, const char* pszNetworkID ) { return PLUGIN_CONTINUE; }
+	virtual void			OnQueryCvarValueFinished( QueryCvarCookie_t iCookie, void* pPlayerEntity, EQueryCvarValueStatus eStatus, const char* pCvarName, const char* pCvarValue ) {}
 };
 CEmptyServerPlugin g_EmptyServerPlugin;
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CEmptyServerPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_EmptyServerPlugin );
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CEmptyServerPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_EmptyServerPlugin );
 
 class CGameServer
 {
 	char padding[0x1e8];
 public:
-	CPrecacheItem model_precache[1024];
-	CPrecacheItem generic_precache[512];
-	CPrecacheItem sound_precache[8192];
-	CPrecacheItem decal_precache[512];
+	CPrecacheItem model_precache[OLD_MAX_MODELS];
+	CPrecacheItem generic_precache[MAX_GENERIC];
+	CPrecacheItem sound_precache[OLD_MAX_SOUNDS];
+	CPrecacheItem decal_precache[MAX_DECALS];
 	CNetworkStringTable* m_pModelPrecacheTable;
 	CNetworkStringTable* m_pSoundPrecacheTable;
 	CNetworkStringTable* m_pGenericPrecacheTable;
@@ -80,7 +94,7 @@ private:
 public:
 	INetworkStringTableContainer* m_StringTableContainer;
 private:
-	char padding2[0x34c - sizeof(void*)];
+	char padding2[0x34c - sizeof( void* )];
 public:
 	CNetworkStringTable* m_pModelPrecacheTable;
 	CNetworkStringTable* m_pGenericPrecacheTable;
@@ -91,352 +105,352 @@ public:
 	CNetworkStringTable* m_pUserInfoTable;
 	CNetworkStringTable* m_pServerStartupTable;
 	CNetworkStringTable* m_pDownloadableTable;
-	CPrecacheItem model_precache[1024];
-	CPrecacheItem generic_precache[512];
-	CPrecacheItem sound_precache[8192];
-	CPrecacheItem decal_precache[512];
+	CPrecacheItem model_precache[OLD_MAX_MODELS];
+	CPrecacheItem generic_precache[MAX_GENERIC];
+	CPrecacheItem sound_precache[OLD_MAX_SOUNDS];
+	CPrecacheItem decal_precache[MAX_DECALS];
 };
 
-CPrecacheItem cl_precache_model[4096];
-CPrecacheItem cl_precache_sound[16384];
-CPrecacheItem sv_precache_model[4096];
-CPrecacheItem sv_precache_sound[16384];
+CPrecacheItem cl_precache_model[MAX_MODELS];
+CPrecacheItem cl_precache_sound[MAX_SOUNDS];
+CPrecacheItem sv_precache_model[MAX_MODELS];
+CPrecacheItem sv_precache_sound[MAX_SOUNDS];
 
 CSigScan CClientState__ClearSounds;
-void __fastcall HK_CClientState_ClearSounds(CClientState* clientstate, void*)
+void __fastcall HK_CClientState_ClearSounds( CClientState* clientstate, void* )
 {
-	int c = ARRAYSIZE(cl_precache_sound);
-	for (int i = 0; i < c; ++i)
+	int c = ARRAYSIZE( cl_precache_sound );
+	for ( int i = 0; i < c; ++i )
 	{
-		cl_precache_sound[i].SetSound(NULL);
+		cl_precache_sound[i].SetSound( NULL );
 	}
 }
 
 CSigScan CClientState_Clear;
-void(__thiscall* CClientState_Clear_org)(CClientState*);
-void __fastcall HK_CClientState_Clear(CClientState* clientstate, void*)
+void( __thiscall* CClientState_Clear_org )(CClientState*);
+void __fastcall HK_CClientState_Clear( CClientState* clientstate, void* )
 {
-	memset(cl_precache_model, 0, sizeof(cl_precache_model));
-	memset(cl_precache_sound, 0, sizeof(cl_precache_sound));
+	memset( cl_precache_model, 0, sizeof( cl_precache_model ) );
+	memset( cl_precache_sound, 0, sizeof( cl_precache_sound ) );
 
-	CClientState_Clear_org(clientstate);
+	CClientState_Clear_org( clientstate );
 }
 
 CSigScan CGameServer_DumpPrecacheStats;
-void __fastcall HK_CGameServer_DumpPrecacheStats(CGameServer* gameserver, void*, INetworkStringTable* table)
+void __fastcall HK_CGameServer_DumpPrecacheStats( CGameServer* gameserver, void*, INetworkStringTable* table )
 {
-	if (table == NULL)
+	if ( table == NULL )
 	{
-		ConMsg("Can only dump stats when active in a level\n");
+		ConMsg( "Can only dump stats when active in a level\n" );
 		return;
 	}
 
 	CPrecacheItem* items = NULL;
-	if (table == gameserver->m_pModelPrecacheTable)
+	if ( table == gameserver->m_pModelPrecacheTable )
 	{
 		items = sv_precache_model;
 	}
-	else if (table == gameserver->m_pGenericPrecacheTable)
+	else if ( table == gameserver->m_pGenericPrecacheTable )
 	{
 		items = gameserver->generic_precache;
 	}
-	else if (table == gameserver->m_pSoundPrecacheTable)
+	else if ( table == gameserver->m_pSoundPrecacheTable )
 	{
 		items = sv_precache_sound;
 	}
-	else if (table == gameserver->m_pDecalPrecacheTable)
+	else if ( table == gameserver->m_pDecalPrecacheTable )
 	{
 		items = gameserver->decal_precache;
 	}
 
-	if (!items)
+	if ( !items )
 		return;
 
 	int count = table->GetNumStrings();
 	int maxcount = table->GetMaxStrings();
 
-	ConMsg("\n");
-	ConMsg("Precache table %s:  %i of %i slots used\n", table->GetTableName(),
-		count, maxcount);
+	ConMsg( "\n" );
+	ConMsg( "Precache table %s:  %i of %i slots used\n", table->GetTableName(),
+		count, maxcount );
 
-	for (int i = 0; i < count; i++)
+	for ( int i = 0; i < count; i++ )
 	{
-		char const* name = table->GetString(i);
+		char const* name = table->GetString( i );
 		CPrecacheItem* slot = &items[i];
 
 		int testLength;
-		const CPrecacheUserData* p = (const CPrecacheUserData*)table->GetStringUserData(i, &testLength);
-		ErrorIfNot(testLength == sizeof(*p),
+		const CPrecacheUserData* p = (const CPrecacheUserData*)table->GetStringUserData( i, &testLength );
+		ErrorIfNot( testLength == sizeof( *p ),
 			("CGameServer::DumpPrecacheStats: invalid CPrecacheUserData length (%d)", testLength)
 		);
 
-		if (!name || !slot || !p)
+		if ( !name || !slot || !p )
 			continue;
 
-		ConMsg("%03i:  %s (%s):   ",
+		ConMsg( "%03i:  %s (%s):   ",
 			i,
 			name,
-			GetFlagString(p->flags));
+			GetFlagString( p->flags ) );
 
-		if (slot->GetReferenceCount() == 0)
+		if ( slot->GetReferenceCount() == 0 )
 		{
-			ConMsg(" never used\n");
+			ConMsg( " never used\n" );
 		}
 		else
 		{
-			ConMsg(" %i refs, first %.2f mru %.2f\n",
+			ConMsg( " %i refs, first %.2f mru %.2f\n",
 				slot->GetReferenceCount(),
 				slot->GetFirstReference(),
-				slot->GetMostRecentReference());
+				slot->GetMostRecentReference() );
 		}
 	}
 
-	ConMsg("\n");
+	ConMsg( "\n" );
 }
 
 CSigScan CClientState_DumpPrecacheStats;
-void __fastcall HK_CClientState_DumpPrecacheStats(CClientState* clientstate, void*, const char* name)
+void __fastcall HK_CClientState_DumpPrecacheStats( CClientState* clientstate, void*, const char* name )
 {
-	if (!name || !name[0])
+	if ( !name || !name[0] )
 	{
-		ConMsg("Can only dump stats when active in a level\n");
+		ConMsg( "Can only dump stats when active in a level\n" );
 		return;
 	}
 
 	CPrecacheItem* items = NULL;
 
-	if (!strcmp(MODEL_PRECACHE_TABLENAME, name))
+	if ( !strcmp( MODEL_PRECACHE_TABLENAME, name ) )
 	{
 		items = cl_precache_model;
 	}
-	else if (!strcmp(GENERIC_PRECACHE_TABLENAME, name))
+	else if ( !strcmp( GENERIC_PRECACHE_TABLENAME, name ) )
 	{
 		items = clientstate->generic_precache;
 	}
-	else if (!strcmp(SOUND_PRECACHE_TABLENAME, name))
+	else if ( !strcmp( SOUND_PRECACHE_TABLENAME, name ) )
 	{
 		items = cl_precache_sound;
 	}
-	else if (!strcmp(DECAL_PRECACHE_TABLENAME, name))
+	else if ( !strcmp( DECAL_PRECACHE_TABLENAME, name ) )
 	{
 		items = clientstate->decal_precache;
 	}
 
-	INetworkStringTable* table = clientstate->m_StringTableContainer->FindTable(name);
-	if (!items || !table)
+	INetworkStringTable* table = clientstate->m_StringTableContainer->FindTable( name );
+	if ( !items || !table )
 	{
-		ConMsg("Precache table '%s' not found.\n", name);
+		ConMsg( "Precache table '%s' not found.\n", name );
 		return;
 	}
 
 	int count = table->GetNumStrings();
 	int maxcount = table->GetMaxStrings();
 
-	ConMsg("\n");
-	ConMsg("Precache table %s:  %i of %i slots used\n", table->GetTableName(),
-		count, maxcount);
+	ConMsg( "\n" );
+	ConMsg( "Precache table %s:  %i of %i slots used\n", table->GetTableName(),
+		count, maxcount );
 
-	for (int i = 0; i < count; i++)
+	for ( int i = 0; i < count; i++ )
 	{
-		char const* pchName = table->GetString(i);
+		char const* pchName = table->GetString( i );
 		CPrecacheItem* slot = &items[i];
 		int testLength;
-		const CPrecacheUserData* p = (CPrecacheUserData*)table->GetStringUserData(i, &testLength);
+		const CPrecacheUserData* p = (CPrecacheUserData*)table->GetStringUserData( i, &testLength );
 
-		if (!pchName || !slot || !p)
+		if ( !pchName || !slot || !p )
 			continue;
 
-		ConMsg("%03i:  %s (%s):   ",
+		ConMsg( "%03i:  %s (%s):   ",
 			i,
 			pchName,
-			GetFlagString(p->flags));
+			GetFlagString( p->flags ) );
 
 
-		if (slot->GetReferenceCount() == 0)
+		if ( slot->GetReferenceCount() == 0 )
 		{
-			ConMsg(" never used\n");
+			ConMsg( " never used\n" );
 		}
 		else
 		{
-			ConMsg(" %i refs, first %.2f mru %.2f\n",
+			ConMsg( " %i refs, first %.2f mru %.2f\n",
 				slot->GetReferenceCount(),
 				slot->GetFirstReference(),
-				slot->GetMostRecentReference());
+				slot->GetMostRecentReference() );
 		}
 	}
 
-	ConMsg("\n");
+	ConMsg( "\n" );
 }
 
 CSigScan CClientState_GetModel;
-model_t* __fastcall HK_CClientState_GetModel(CClientState* clientstate, void*, int index)
+model_t* __fastcall HK_CClientState_GetModel( CClientState* clientstate, void*, int index )
 {
-	if (!clientstate->m_pModelPrecacheTable)
+	if ( !clientstate->m_pModelPrecacheTable )
 	{
 		return NULL;
 	}
 
-	if (index <= 0)
+	if ( index <= 0 )
 	{
 		return NULL;
 	}
 
-	if (index >= clientstate->m_pModelPrecacheTable->GetNumStrings())
+	if ( index >= clientstate->m_pModelPrecacheTable->GetNumStrings() )
 	{
-		Assert(0); // model index for unkown model requested
+		Assert( 0 ); // model index for unkown model requested
 		return NULL;
 	}
 
 	CPrecacheItem* p = &cl_precache_model[index];
 	model_t* m = p->GetModel();
-	if (m)
+	if ( m )
 	{
 		return m;
 	}
 
-	char const* name = clientstate->m_pModelPrecacheTable->GetString(index);
+	char const* name = clientstate->m_pModelPrecacheTable->GetString( index );
 
-	m = modelloader->GetModelForName(name, IModelLoader::FMODELLOADER_CLIENT);
-	if (!m)
+	m = modelloader->GetModelForName( name, IModelLoader::FMODELLOADER_CLIENT );
+	if ( !m )
 	{
 		int testLength;
-		const CPrecacheUserData* data = (CPrecacheUserData*)clientstate->m_pModelPrecacheTable->GetStringUserData(index, &testLength);
-		if (data && (data->flags & RES_FATALIFMISSING))
+		const CPrecacheUserData* data = (CPrecacheUserData*)clientstate->m_pModelPrecacheTable->GetStringUserData( index, &testLength );
+		if ( data && (data->flags & RES_FATALIFMISSING) )
 		{
-			ConMsg("Cannot continue without model %s, disconnecting\n", name);
-			Host_Disconnect(true);
+			ConMsg( "Cannot continue without model %s, disconnecting\n", name );
+			Host_Disconnect( true );
 		}
 	}
 
-	p->SetModel(m);
+	p->SetModel( m );
 	return m;
 }
 
 CSigScan CClientState_SetModel;
-void __fastcall HK_CClientState_SetModel(CClientState* clientstate, void*, int tableIndex)
+void __fastcall HK_CClientState_SetModel( CClientState* clientstate, void*, int tableIndex )
 {
-	if (!clientstate->m_pModelPrecacheTable)
+	if ( !clientstate->m_pModelPrecacheTable )
 	{
 		return;
 	}
 
 	// Bogus index
-	if (tableIndex < 0 || tableIndex >= clientstate->m_pModelPrecacheTable->GetNumStrings())
+	if ( tableIndex < 0 || tableIndex >= clientstate->m_pModelPrecacheTable->GetNumStrings() )
 	{
 		return;
 	}
 
 	CPrecacheItem* p = &cl_precache_model[tableIndex];
 	int testLength;
-	const CPrecacheUserData* data = (CPrecacheUserData*)clientstate->m_pModelPrecacheTable->GetStringUserData(tableIndex, &testLength);
+	const CPrecacheUserData* data = (CPrecacheUserData*)clientstate->m_pModelPrecacheTable->GetStringUserData( tableIndex, &testLength );
 
-	static ConVar* cl_forcepreload = cvar->FindVar("cl_forcepreload");
+	static ConVar* cl_forcepreload = cvar->FindVar( "cl_forcepreload" );
 	bool bLoadNow = (data && (data->flags & RES_PRELOAD));
-	if (CommandLine()->FindParm("-nopreload") || CommandLine()->FindParm("-nopreloadmodels"))
+	if ( CommandLine()->FindParm( "-nopreload" ) || CommandLine()->FindParm( "-nopreloadmodels" ) )
 	{
 		bLoadNow = false;
 	}
-	else if (cl_forcepreload->GetInt() || CommandLine()->FindParm("-preload"))
+	else if ( cl_forcepreload->GetInt() || CommandLine()->FindParm( "-preload" ) )
 	{
 		bLoadNow = true;
 	}
 
-	if (bLoadNow)
+	if ( bLoadNow )
 	{
-		char const* name = clientstate->m_pModelPrecacheTable->GetString(tableIndex);
-		p->SetModel(modelloader->GetModelForName(name, IModelLoader::FMODELLOADER_CLIENT));
+		char const* name = clientstate->m_pModelPrecacheTable->GetString( tableIndex );
+		p->SetModel( modelloader->GetModelForName( name, IModelLoader::FMODELLOADER_CLIENT ) );
 	}
 	else
 	{
-		p->SetModel(NULL);
+		p->SetModel( NULL );
 	}
 
 
 	// log the file reference, if necssary
-	if (MapReslistGenerator()->IsEnabled())
+	if ( MapReslistGenerator()->IsEnabled() )
 	{
-		char const* name = clientstate->m_pModelPrecacheTable->GetString(tableIndex);
-		MapReslistGenerator()->OnModelPrecached(name);
+		char const* name = clientstate->m_pModelPrecacheTable->GetString( tableIndex );
+		MapReslistGenerator()->OnModelPrecached( name );
 	}
 }
 
 CSigScan CClientState_GetSound;
-void* __fastcall HK_CClientState_GetSound(CClientState* clientstate, void*, int index)
+void* __fastcall HK_CClientState_GetSound( CClientState* clientstate, void*, int index )
 {
-	if (index <= 0 || !clientstate->m_pSoundPrecacheTable)
+	if ( index <= 0 || !clientstate->m_pSoundPrecacheTable )
 		return NULL;
 
-	if (index >= clientstate->m_pSoundPrecacheTable->GetNumStrings())
+	if ( index >= clientstate->m_pSoundPrecacheTable->GetNumStrings() )
 	{
 		return NULL;
 	}
 
 	CPrecacheItem* p = &cl_precache_sound[index];
 	CSfxTable* s = p->GetSound();
-	if (s)
+	if ( s )
 		return s;
 
-	char const* name = clientstate->m_pSoundPrecacheTable->GetString(index);
+	char const* name = clientstate->m_pSoundPrecacheTable->GetString( index );
 
-	s = S_PrecacheSound(name);
+	s = S_PrecacheSound( name );
 
-	p->SetSound(s);
+	p->SetSound( s );
 	return s;
 }
 
 CSigScan CClientState_SetSound;
-void __fastcall HK_CClientState_SetSound(CClientState* clientstate, void*, int tableIndex)
+void __fastcall HK_CClientState_SetSound( CClientState* clientstate, void*, int tableIndex )
 {
 	// Bogus index
-	if (!clientstate->m_pSoundPrecacheTable)
+	if ( !clientstate->m_pSoundPrecacheTable )
 		return;
 
-	if (tableIndex < 0 || tableIndex >= clientstate->m_pSoundPrecacheTable->GetNumStrings()) {
+	if ( tableIndex < 0 || tableIndex >= clientstate->m_pSoundPrecacheTable->GetNumStrings() ) {
 		return;
 	}
 
 	CPrecacheItem* p = &cl_precache_sound[tableIndex];
 
 	int testLength;
-	const CPrecacheUserData* data = (CPrecacheUserData*)clientstate->m_pSoundPrecacheTable->GetStringUserData(tableIndex, &testLength);
+	const CPrecacheUserData* data = (CPrecacheUserData*)clientstate->m_pSoundPrecacheTable->GetStringUserData( tableIndex, &testLength );
 
 	bool bLoadNow = (data && (data->flags & RES_PRELOAD));
-	static ConVar* cl_forcepreload = cvar->FindVar("cl_forcepreload");
-	if (CommandLine()->FindParm("-nopreload") || CommandLine()->FindParm("-nopreloadsounds"))
+	static ConVar* cl_forcepreload = cvar->FindVar( "cl_forcepreload" );
+	if ( CommandLine()->FindParm( "-nopreload" ) || CommandLine()->FindParm( "-nopreloadsounds" ) )
 	{
 		bLoadNow = false;
 	}
-	else if (cl_forcepreload->GetInt() || CommandLine()->FindParm("-preload"))
+	else if ( cl_forcepreload->GetInt() || CommandLine()->FindParm( "-preload" ) )
 	{
 		bLoadNow = true;
 	}
 
-	if (bLoadNow)
+	if ( bLoadNow )
 	{
-		char const* name = clientstate->m_pSoundPrecacheTable->GetString(tableIndex);
-		p->SetSound(S_PrecacheSound(name));
+		char const* name = clientstate->m_pSoundPrecacheTable->GetString( tableIndex );
+		p->SetSound( S_PrecacheSound( name ) );
 	}
 	else
 	{
-		p->SetSound(NULL);
+		p->SetSound( NULL );
 	}
 
 	// log the file reference, if necssary
-	if (MapReslistGenerator()->IsEnabled())
+	if ( MapReslistGenerator()->IsEnabled() )
 	{
-		char const* name = clientstate->m_pSoundPrecacheTable->GetString(tableIndex);
-		MapReslistGenerator()->OnSoundPrecached(name);
+		char const* name = clientstate->m_pSoundPrecacheTable->GetString( tableIndex );
+		MapReslistGenerator()->OnSoundPrecached( name );
 	}
 }
 
 CSigScan CGameServer_GetSound;
-const char* __fastcall HK_CGameServer_GetSound(CGameServer* gameserver, void*, int index)
+const char* __fastcall HK_CGameServer_GetSound( CGameServer* gameserver, void*, int index )
 {
-	if (index <= 0 || !gameserver->m_pSoundPrecacheTable) {
+	if ( index <= 0 || !gameserver->m_pSoundPrecacheTable ) {
 		return NULL;
 	}
 
-	if (index >= gameserver->m_pSoundPrecacheTable->GetNumStrings()) {
+	if ( index >= gameserver->m_pSoundPrecacheTable->GetNumStrings() ) {
 		return NULL;
 	}
 
@@ -445,40 +459,40 @@ const char* __fastcall HK_CGameServer_GetSound(CGameServer* gameserver, void*, i
 }
 
 CSigScan CGameServer_GetModel;
-model_t* __fastcall HK_CGameServer_GetModel(CGameServer* gameserver, void*, int index)
+model_t* __fastcall HK_CGameServer_GetModel( CGameServer* gameserver, void*, int index )
 {
-	if (index <= 0 || !gameserver->m_pModelPrecacheTable)
+	if ( index <= 0 || !gameserver->m_pModelPrecacheTable )
 		return NULL;
 
-	if (index >= gameserver->m_pModelPrecacheTable->GetNumStrings())
+	if ( index >= gameserver->m_pModelPrecacheTable->GetNumStrings() )
 	{
 		return NULL;
 	}
 
 	CPrecacheItem* slot = &sv_precache_model[index];
 	model_t* m = slot->GetModel();
-	if (m)
+	if ( m )
 	{
 		return m;
 	}
 
-	char const* modelname = gameserver->m_pModelPrecacheTable->GetString(index);
-	Assert(modelname);
+	char const* modelname = gameserver->m_pModelPrecacheTable->GetString( index );
+	Assert( modelname );
 
-	m = modelloader->GetModelForName(modelname, IModelLoader::FMODELLOADER_SERVER);
-	slot->SetModel(m);
+	m = modelloader->GetModelForName( modelname, IModelLoader::FMODELLOADER_SERVER );
+	slot->SetModel( m );
 
 	return m;
 }
 
 CSigScan CGameServer_PrecacheModel;
-int __fastcall HK_CGameServer_PrecacheModel(CGameServer* gameserver, void*, char const* name, int flags, model_t* model)
+int __fastcall HK_CGameServer_PrecacheModel( CGameServer* gameserver, void*, char const* name, int flags, model_t* model )
 {
-	if (!gameserver->m_pModelPrecacheTable)
+	if ( !gameserver->m_pModelPrecacheTable )
 		return -1;
 
-	int idx = gameserver->m_pModelPrecacheTable->AddString(true, name);
-	if (idx == INVALID_STRING_INDEX)
+	int idx = gameserver->m_pModelPrecacheTable->AddString( true, name );
+	if ( idx == INVALID_STRING_INDEX )
 	{
 		return -1;
 	}
@@ -486,8 +500,8 @@ int __fastcall HK_CGameServer_PrecacheModel(CGameServer* gameserver, void*, char
 	CPrecacheUserData p;
 
 	// first time, set file size & flags
-	CPrecacheUserData const* pExisting = (CPrecacheUserData const*)gameserver->m_pModelPrecacheTable->GetStringUserData(idx, NULL);
-	if (!pExisting)
+	CPrecacheUserData const* pExisting = (CPrecacheUserData const*)gameserver->m_pModelPrecacheTable->GetStringUserData( idx, NULL );
+	if ( !pExisting )
 	{
 		p.flags = flags;
 	}
@@ -498,38 +512,38 @@ int __fastcall HK_CGameServer_PrecacheModel(CGameServer* gameserver, void*, char
 		p.flags |= flags;
 	}
 
-	gameserver->m_pModelPrecacheTable->SetStringUserData(idx, sizeof(p), &p);
+	gameserver->m_pModelPrecacheTable->SetStringUserData( idx, sizeof( p ), &p );
 
 	CPrecacheItem* slot = &sv_precache_model[idx];
 
-	if (model)
+	if ( model )
 	{
-		slot->SetModel(model);
+		slot->SetModel( model );
 	}
 
 	bool bLoadNow = (!slot->GetModel() && (flags & RES_PRELOAD));
-	static ConVar* sv_forcepreload = cvar->FindVar("sv_forcepreload");
-	if (CommandLine()->FindParm("-nopreload") || CommandLine()->FindParm("-nopreloadmodels"))
+	static ConVar* sv_forcepreload = cvar->FindVar( "sv_forcepreload" );
+	if ( CommandLine()->FindParm( "-nopreload" ) || CommandLine()->FindParm( "-nopreloadmodels" ) )
 	{
 		bLoadNow = false;
 	}
-	else if (sv_forcepreload->GetInt() || CommandLine()->FindParm("-preload"))
+	else if ( sv_forcepreload->GetInt() || CommandLine()->FindParm( "-preload" ) )
 	{
 		bLoadNow = true;
 	}
 
-	if (idx != 0)
+	if ( idx != 0 )
 	{
-		if (bLoadNow)
+		if ( bLoadNow )
 		{
-			slot->SetModel(modelloader->GetModelForName(name, IModelLoader::FMODELLOADER_SERVER));
-			enginevgui->UpdateProgressBar(PROGRESS_PRECACHE);
-			MapReslistGenerator()->OnModelPrecached(name);
+			slot->SetModel( modelloader->GetModelForName( name, IModelLoader::FMODELLOADER_SERVER ) );
+			enginevgui->UpdateProgressBar( PROGRESS_PRECACHE );
+			MapReslistGenerator()->OnModelPrecached( name );
 		}
 		else
 		{
-			modelloader->ReferenceModel(name, IModelLoader::FMODELLOADER_SERVER);
-			slot->SetModel(NULL);
+			modelloader->ReferenceModel( name, IModelLoader::FMODELLOADER_SERVER );
+			slot->SetModel( NULL );
 		}
 	}
 
@@ -537,27 +551,27 @@ int __fastcall HK_CGameServer_PrecacheModel(CGameServer* gameserver, void*, char
 }
 
 CSigScan CGameServer_PrecacheSound;
-int __fastcall HK_CGameServer_PrecacheSound(CGameServer* gameserver, void*, char const* name, int flags)
+int __fastcall HK_CGameServer_PrecacheSound( CGameServer* gameserver, void*, char const* name, int flags )
 {
-	if (!gameserver->m_pSoundPrecacheTable)
+	if ( !gameserver->m_pSoundPrecacheTable )
 		return -1;
 
-	int idx = gameserver->m_pSoundPrecacheTable->AddString(true, name);
-	if (idx == INVALID_STRING_INDEX)
+	int idx = gameserver->m_pSoundPrecacheTable->AddString( true, name );
+	if ( idx == INVALID_STRING_INDEX )
 	{
 		return -1;
 	}
 
 	// mark the sound as being precached, but check first that reslist generation is enabled to save on the va() call
-	if (MapReslistGenerator()->IsEnabled() && name[0])
+	if ( MapReslistGenerator()->IsEnabled() && name[0] )
 	{
-		MapReslistGenerator()->OnResourcePrecached(va("sound/%s", PSkipSoundChars(name)));
+		MapReslistGenerator()->OnResourcePrecached( va( "sound/%s", PSkipSoundChars( name ) ) );
 	}
 
 	// first time, set file size & flags
 	CPrecacheUserData p;
-	CPrecacheUserData const* pExisting = (CPrecacheUserData const*)gameserver->m_pSoundPrecacheTable->GetStringUserData(idx, NULL);
-	if (!pExisting)
+	CPrecacheUserData const* pExisting = (CPrecacheUserData const*)gameserver->m_pSoundPrecacheTable->GetStringUserData( idx, NULL );
+	if ( !pExisting )
 	{
 		p.flags = flags;
 	}
@@ -568,41 +582,41 @@ int __fastcall HK_CGameServer_PrecacheSound(CGameServer* gameserver, void*, char
 		p.flags |= flags;
 	}
 
-	gameserver->m_pSoundPrecacheTable->SetStringUserData(idx, sizeof(p), &p);
+	gameserver->m_pSoundPrecacheTable->SetStringUserData( idx, sizeof( p ), &p );
 
 	CPrecacheItem* slot = &sv_precache_sound[idx];
-	slot->SetName(name);
+	slot->SetName( name );
 
 	return idx;
 }
 
-bool CEmptyServerPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory )
+bool CEmptyServerPlugin::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory )
 {
 	MH_Initialize();
-	CSigScan::GetDllMemInfo("engine.dll");
+	CSigScan::GetDllMemInfo( "engine.dll" );
 
-	enginevgui = (IEngineVGuiInternal*)interfaceFactory(VENGINE_VGUI_VERSION, NULL);
-	if (!enginevgui) {
-		ConColorMsg(Color(255, 0, 0), "Failed to get IEngineVGui interface!\n");
+	enginevgui = (IEngineVGuiInternal*)interfaceFactory( VENGINE_VGUI_VERSION, NULL );
+	if ( !enginevgui ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to get IEngineVGui interface!\n" );
 		return false;
 	}
 
-	cvar = (ICvar*)interfaceFactory(CVAR_INTERFACE_VERSION, NULL);
-	if (!cvar) {
-		ConColorMsg(Color(255, 0, 0), "Failed to get ICvar interface!\n");
+	cvar = (ICvar*)interfaceFactory( CVAR_INTERFACE_VERSION, NULL );
+	if ( !cvar ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to get ICvar interface!\n" );
 		return false;
 	}
 
-	if (!CMapReslistGenerator::SigScan())
+	if ( !CMapReslistGenerator::SigScan() )
 		return false;
 
 	// -----------------------------------------------------------------
 	// Host_Disconnect function
 	CSigScan Host_Disconnect_Sig;
 	Host_Disconnect_Sig.Init(
-		"\x80\x3D\xCC\xCC\xCC\xCC\xCC\x75\x0F\x8B\x44\x24\x04", "xx?????xxxxxx", 13);
-	if (!Host_Disconnect_Sig.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find Host_Disconnect signature!\n");
+		"\x80\x3D\xCC\xCC\xCC\xCC\xCC\x75\x0F\x8B\x44\x24\x04", "xx?????xxxxxx", 13 );
+	if ( !Host_Disconnect_Sig.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find Host_Disconnect signature!\n" );
 		return false;
 	}
 	Host_Disconnect = (decltype(Host_Disconnect))Host_Disconnect_Sig.sig_addr;
@@ -612,9 +626,9 @@ bool CEmptyServerPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 	CSigScan S_PrecacheSound_Sig;
 	S_PrecacheSound_Sig.Init(
 		"\x8B\x0D\xCC\xCC\xCC\xCC\x85\xC9\x75\x03\x33\xC0\xC3\x8B\x01\x8B\x10",
-		"xx????xxxxxxxxxxx", 17);
-	if (!S_PrecacheSound_Sig.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find S_PrecacheSound signature!\n");
+		"xx????xxxxxxxxxxx", 17 );
+	if ( !S_PrecacheSound_Sig.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find S_PrecacheSound signature!\n" );
 		return false;
 	}
 	S_PrecacheSound = (decltype(S_PrecacheSound))S_PrecacheSound_Sig.sig_addr;
@@ -624,153 +638,209 @@ bool CEmptyServerPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 	CSigScan modelloader_Sig;
 	modelloader_Sig.Init(
 		"\x8B\x0D\xCC\xCC\xCC\xCC\x8B\x11\x8B\x42\x1C\x6A\x04\x53\xFF\xD0\x8B\xE8",
-		"xx????xxxxxxxxxxxx", 18);
-	if (!modelloader_Sig.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find modelloader signature!\n");
+		"xx????xxxxxxxxxxxx", 18 );
+	if ( !modelloader_Sig.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find modelloader signature!\n" );
 		return false;
 	}
 	modelloader = **(IModelLoader***)((unsigned long)modelloader_Sig.sig_addr + 2);
-	
+
 	// -----------------------------------------------------------------
 	// CClientState::ClearSounds signatures
 	CClientState__ClearSounds.Init(
-		"\x8D\x49\x00\x6A\x00\x8B\xCE\xE8\xCC\xCC\xCC\xCC\x83\xC6\x08", 
-		"xxxxxxxx????xxx", 15);
-	if (!CClientState__ClearSounds.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find CClientState::ClearSounds signature!\n");
+		"\x8D\x49\x00\x6A\x00\x8B\xCE\xE8\xCC\xCC\xCC\xCC\x83\xC6\x08",
+		"xxxxxxxx????xxx", 15 );
+	if ( !CClientState__ClearSounds.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find CClientState::ClearSounds signature!\n" );
 		return false;
 	}
-	MH_CreateHookOffset(CClientState__ClearSounds.sig_addr, -13, 
-		&HK_CClientState_ClearSounds, NULL);
-	
+	MH_CreateHookOffset( CClientState__ClearSounds.sig_addr, -13,
+		&HK_CClientState_ClearSounds, NULL );
+
+	// -----------------------------------------------------------------
+	// SoundInfo_t::WriteDelta && SoundInfo_t::ReadDelta
+	// ( OLD_MAX_SOUND_INDEX_BITS -> MAX_SOUND_INDEX_BITS )
+	// MAX_SOUND_INDEX_BITS is used to optimize space when sending sound packets, needs to be changed to not overflow!
+	CSigScan SoundInfo_t__WriteDelta;
+	CSigScan SoundInfo_t__ReadDelta1, SoundInfo_t__ReadDelta2, SoundInfo_t__ReadDelta3, SoundInfo_t__ReadDelta4;
+
+	SoundInfo_t__WriteDelta.Init(
+		"\x6A\x0D\x50\x8B\xCE\xE8\xCC\xCC\xCC\xCC\x8B\x4F\x44", "xxxxxx????xxx", 13 );
+	SoundInfo_t__ReadDelta1.Init(
+		"\x83\xF9\x0D\x7C\x7C", "xxxxx", 5 );
+	SoundInfo_t__ReadDelta2.Init(
+		"\xBA\x0D\x00\x00\x00\x2B\xD1\x8B\x48\x18\x3B\xCE\x75\x0C\x89\x68\x14\x89\x58\x10\xC6\x40\x04\x01\xEB\x10\x76\x09\xC6\x40\x04\x01\x89\x58\x10\xEB\x0B\x8B\x31\x89\x70\x10\x83\xC1\x04\x89\x48\x18\x38\x58\x04\x74\x0B", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 53 );
+	SoundInfo_t__ReadDelta3.Init(
+		"\x83\xC1\xF3\x3B\xCB\x89\x48\x14\x74\x12", "xxxxxxxxxx", 12 );
+	SoundInfo_t__ReadDelta4.Init(
+		"\xC1\xEA\x0D\x89\x50\x10\x8B\x54\x24\x10", "xxxxxxxxxx", 12 );
+
+	if ( !SoundInfo_t__WriteDelta.is_set || !SoundInfo_t__ReadDelta1.is_set || !SoundInfo_t__ReadDelta2.is_set || !SoundInfo_t__ReadDelta3.is_set || !SoundInfo_t__ReadDelta4.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find SoundInfo_t::(Write|Read)Delta signatures!\n" );
+		return false;
+	}
+	WriteByte( (void*)((unsigned long)SoundInfo_t__WriteDelta.sig_addr + 1), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta1.sig_addr + 2), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta2.sig_addr + 1), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta3.sig_addr + 2), -MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta4.sig_addr + 2), MAX_SOUND_INDEX_BITS );
+
+	// -----------------------------------------------------------------
+	// SVC_Prefetch::WriteToBuffer && SVC_Prefetch::ReadFromBuffer
+	// ( OLD_MAX_SOUND_INDEX_BITS -> MAX_SOUND_INDEX_BITS )
+	// MAX_SOUND_INDEX_BITS is used to optimize space when sending sound packets, needs to be changed to not overflow!
+	CSigScan SVC_Prefetch__WriteToBuffer;
+	CSigScan SVC_Prefetch__ReadFromBuffer1, SVC_Prefetch__ReadFromBuffer2, SVC_Prefetch__ReadFromBuffer3, SVC_Prefetch__ReadFromBuffer4;
+
+	SVC_Prefetch__WriteToBuffer.Init(
+		"\x6A\x0D\x50\x8B\xCF", "xxxxx", 5 );
+	SVC_Prefetch__ReadFromBuffer1.Init(
+		"\x83\xF9\x0D\x56\x89\x5C\x24\x0C", "xxxxxxxx", 8 );
+	SVC_Prefetch__ReadFromBuffer2.Init(
+		"\xBA\x0D\x00\x00\x00\x2B\xD1\x8B\x48\x18\x3B\xCE\x57", "xxxxxxxxxxxxx", 13 );
+	SVC_Prefetch__ReadFromBuffer3.Init(
+		"\x83\xC1\xF3\x3B\xCD", "xxxxx", 5 );
+	SVC_Prefetch__ReadFromBuffer4.Init(
+		"\xC1\xEA\x0D\x89\x50\x10\x8B\xCE\xE9\xB4\x00\x00\x00", "xxxxxxxxxxxxx", 13 );
+
+	if ( !SVC_Prefetch__WriteToBuffer.is_set || !SVC_Prefetch__ReadFromBuffer1.is_set || !SVC_Prefetch__ReadFromBuffer2.is_set || !SVC_Prefetch__ReadFromBuffer3.is_set || !SVC_Prefetch__ReadFromBuffer4.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find SVC_Prefetch::(WriteTo|ReadFrom)Buffer signatures!\n" );
+		return false;
+	}
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__WriteToBuffer.sig_addr + 1), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer1.sig_addr + 2), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer2.sig_addr + 1), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer3.sig_addr + 2), -MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer4.sig_addr + 2), MAX_SOUND_INDEX_BITS );
+
 	// -----------------------------------------------------------------
 	// CreateEngineStringTables signatures and writes
 	CSigScan CGameServer__CreateEngineStringTables_model;
 	CSigScan CGameServer__CreateEngineStringTables_sound;
 
 	CGameServer__CreateEngineStringTables_model.Init(
-		"\x68\x00\x04\x00\x00\x8D\x54\x24\x20\x52\xFF\xD0", "xxxxxxxxxxxx", 12);
+		"\x68\x00\x04\x00\x00\x8D\x54\x24\x20\x52\xFF\xD0", "xxxxxxxxxxxx", 12 );
 	CGameServer__CreateEngineStringTables_sound.Init(
-		"\x68\x00\x20\x00\x00\x8D\x94\x24\x20\x02\x00\x00", "xxxxxxxxxxxx", 12);
-	
-	if (!CGameServer__CreateEngineStringTables_model.is_set || !CGameServer__CreateEngineStringTables_sound.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find CGameServer::CreateEngineStringTables signature!\n");
+		"\x68\x00\x20\x00\x00\x8D\x94\x24\x20\x02\x00\x00", "xxxxxxxxxxxx", 12 );
+
+	if ( !CGameServer__CreateEngineStringTables_model.is_set || !CGameServer__CreateEngineStringTables_sound.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find CGameServer::CreateEngineStringTables signature!\n" );
 		return false;
 	}
-	WriteByte((void*)((unsigned long)CGameServer__CreateEngineStringTables_model.sig_addr + 2), 0x10); // 4096 models
-	WriteByte((void*)((unsigned long)CGameServer__CreateEngineStringTables_sound.sig_addr + 2), 0x40); // 16384 sounds
-	
+	WriteByte( (void*)((unsigned long)CGameServer__CreateEngineStringTables_model.sig_addr + 2), 0x10 ); // 4096 models
+	WriteByte( (void*)((unsigned long)CGameServer__CreateEngineStringTables_sound.sig_addr + 2), 0x40 ); // 16384 sounds
+
 	// DumpPrecacheStats signatures and hooks
 	CGameServer_DumpPrecacheStats.Init(
-		"\x55\x8B\xEC\x83\xE4\xC0\x83\xEC\x34\x53\x56\x8B\x75\x08", "xxxxxxxxxxxxxx", 14);
+		"\x55\x8B\xEC\x83\xE4\xC0\x83\xEC\x34\x53\x56\x8B\x75\x08", "xxxxxxxxxxxxxx", 14 );
 	CClientState_DumpPrecacheStats.Init(
-		"\x55\x8B\xEC\x83\xE4\xC0\x8B\x45\x08\x83\xEC\x34\x85\xC0", "xxxxxxxxxxxxxx", 14);
-	
-	if (!CGameServer_DumpPrecacheStats.is_set || !CClientState_DumpPrecacheStats.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find DumpPrecacheStats signature!\n");
+		"\x55\x8B\xEC\x83\xE4\xC0\x8B\x45\x08\x83\xEC\x34\x85\xC0", "xxxxxxxxxxxxxx", 14 );
+
+	if ( !CGameServer_DumpPrecacheStats.is_set || !CClientState_DumpPrecacheStats.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find DumpPrecacheStats signature!\n" );
 		return false;
 	}
-	
-	MH_CreateHook(CGameServer_DumpPrecacheStats.sig_addr,
-		&HK_CGameServer_DumpPrecacheStats, NULL);
-	MH_CreateHook(CClientState_DumpPrecacheStats.sig_addr,
-		&HK_CClientState_DumpPrecacheStats, NULL);
-	
+
+	MH_CreateHook( CGameServer_DumpPrecacheStats.sig_addr,
+		&HK_CGameServer_DumpPrecacheStats, NULL );
+	MH_CreateHook( CClientState_DumpPrecacheStats.sig_addr,
+		&HK_CClientState_DumpPrecacheStats, NULL );
+
 	// -----------------------------------------------------------------
 	// CClientState::Clear hook
 	CClientState_Clear.Init(
-		"\x53\x56\x8B\xF1\xE8\xCC\xCC\xCC\xCC\x33\xDB\x6A\xFF", "xxxxx????xxxx", 13);
-	
-	if (!CClientState_Clear.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find DumpPrecacheStats signature!\n");
+		"\x53\x56\x8B\xF1\xE8\xCC\xCC\xCC\xCC\x33\xDB\x6A\xFF", "xxxxx????xxxx", 13 );
+
+	if ( !CClientState_Clear.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find DumpPrecacheStats signature!\n" );
 		return false;
 	}
-	
-	MH_CreateHookEx(CClientState_Clear.sig_addr,
-		&HK_CClientState_Clear, &CClientState_Clear_org);
-	
+
+	MH_CreateHookEx( CClientState_Clear.sig_addr,
+		&HK_CClientState_Clear, &CClientState_Clear_org );
+
 	// -----------------------------------------------------------------
 	// CClientState Get signatures and hooks
 	CClientState_GetModel.Init(
-		"\x56\x8B\xF1\x83\xBE\x4C\x8D\x00\x00\x00\x75\x06", "xxxxxxxxxxxx", 12);
+		"\x56\x8B\xF1\x83\xBE\x4C\x8D\x00\x00\x00\x75\x06", "xxxxxxxxxxxx", 12 );
 	CClientState_GetSound.Init(
-		"\x56\x57\x8B\x7C\x24\x0C\x85\xFF\x8B\xF1\x7E\x1A\x83\xBE\x54\x8D\x00\x00\x00", 
-		"xxxxxxxxxxxxxxxxxxx", 19);
-	
-	if (!CClientState_GetModel.is_set || !CClientState_GetSound.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find a CClientState Getter signature!\n");
+		"\x56\x57\x8B\x7C\x24\x0C\x85\xFF\x8B\xF1\x7E\x1A\x83\xBE\x54\x8D\x00\x00\x00",
+		"xxxxxxxxxxxxxxxxxxx", 19 );
+
+	if ( !CClientState_GetModel.is_set || !CClientState_GetSound.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find a CClientState Getter signature!\n" );
 		return false;
 	}
-	
-	MH_CreateHook(CClientState_GetModel.sig_addr,
-		&HK_CClientState_GetModel, NULL);
-	MH_CreateHook(CClientState_GetSound.sig_addr,
-		&HK_CClientState_GetSound, NULL);
-	
+
+	MH_CreateHook( CClientState_GetModel.sig_addr,
+		&HK_CClientState_GetModel, NULL );
+	MH_CreateHook( CClientState_GetSound.sig_addr,
+		&HK_CClientState_GetSound, NULL );
+
 	// -----------------------------------------------------------------
 	// CClientState Set signatures and hooks
 	CClientState_SetModel.Init(
-		"\x56\x8B\xF1\x83\xBE\x4C\x8D\x00\x00\x00\x0F\x84\xF4\x00\x00\x00", 
-		"xxxxxxxxxxxxxxxx", 16);
+		"\x56\x8B\xF1\x83\xBE\x4C\x8D\x00\x00\x00\x0F\x84\xF4\x00\x00\x00",
+		"xxxxxxxxxxxxxxxx", 16 );
 	CClientState_SetSound.Init(
-		"\x56\x8B\xF1\x83\xBE\x54\x8D\x00\x00\x00", "xxxxxxxxxx", 10);
-	
-	if (!CClientState_SetModel.is_set || !CClientState_SetSound.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find a CClientState Setter signature!\n");
+		"\x56\x8B\xF1\x83\xBE\x54\x8D\x00\x00\x00", "xxxxxxxxxx", 10 );
+
+	if ( !CClientState_SetModel.is_set || !CClientState_SetSound.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find a CClientState Setter signature!\n" );
 		return false;
 	}
-	
-	MH_CreateHook(CClientState_SetModel.sig_addr,
-		&HK_CClientState_SetModel, NULL);
-	MH_CreateHook(CClientState_SetSound.sig_addr,
-		&HK_CClientState_SetSound, NULL);
-	
+
+	MH_CreateHook( CClientState_SetModel.sig_addr,
+		&HK_CClientState_SetModel, NULL );
+	MH_CreateHook( CClientState_SetSound.sig_addr,
+		&HK_CClientState_SetSound, NULL );
+
 	// -----------------------------------------------------------------
 	// CGameServer Get signatures and hooks
 	CGameServer_GetSound.Init(
-		"\x56\x57\x8B\x7C\x24\x0C\x85\xFF\x8B\xF1\x7E\x2B", "xxxxxxxxxxxx", 12);
+		"\x56\x57\x8B\x7C\x24\x0C\x85\xFF\x8B\xF1\x7E\x2B", "xxxxxxxxxxxx", 12 );
 	CGameServer_GetModel.Init(
 		"\x56\x57\x8B\x7C\x24\x0C\x85\xFF\x8B\xF1\x7E\x1A\x83\xBE\xE8\x41\x01\x00\x00",
-		"xxxxxxxxxxxxxxxxxxx", 19);
-	
-	if (!CGameServer_GetSound.is_set || !CGameServer_GetModel.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find a CGameServer Getter signature!\n");
+		"xxxxxxxxxxxxxxxxxxx", 19 );
+
+	if ( !CGameServer_GetSound.is_set || !CGameServer_GetModel.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find a CGameServer Getter signature!\n" );
 		return false;
 	}
-	
-	MH_CreateHook(CGameServer_GetSound.sig_addr,
-		&HK_CGameServer_GetSound, NULL);
-	MH_CreateHook(CGameServer_GetModel.sig_addr,
-		&HK_CGameServer_GetModel, NULL);
-	
+
+	MH_CreateHook( CGameServer_GetSound.sig_addr,
+		&HK_CGameServer_GetSound, NULL );
+	MH_CreateHook( CGameServer_GetModel.sig_addr,
+		&HK_CGameServer_GetModel, NULL );
+
 	// -----------------------------------------------------------------
 	// CGameServer Precache signatures and hooks
 	CGameServer_PrecacheModel.Init(
-		"\x51\x56\x8B\xF1\x83\xBE\xE8\x41\x01\x00\x00", "xxxxxxxxxxx", 11);
+		"\x51\x56\x8B\xF1\x83\xBE\xE8\x41\x01\x00\x00", "xxxxxxxxxxx", 11 );
 	CGameServer_PrecacheSound.Init(
-		"\x57\x8B\xF9\x83\xBF\xEC\x41\x01\x00\x00", "xxxxxxxxxx", 10);
-	
-	if (!CGameServer_PrecacheModel.is_set || !CGameServer_PrecacheSound.is_set) {
-		ConColorMsg(Color(255, 0, 0), "Failed to find a CGameServer Precacher signature!\n");
+		"\x57\x8B\xF9\x83\xBF\xEC\x41\x01\x00\x00", "xxxxxxxxxx", 10 );
+
+	if ( !CGameServer_PrecacheModel.is_set || !CGameServer_PrecacheSound.is_set ) {
+		ConColorMsg( Color( 255, 0, 0 ), "Failed to find a CGameServer Precacher signature!\n" );
 		return false;
 	}
-	
-	MH_CreateHook(CGameServer_PrecacheModel.sig_addr,
-		&HK_CGameServer_PrecacheModel, NULL);
-	MH_CreateHook(CGameServer_PrecacheSound.sig_addr,
-		&HK_CGameServer_PrecacheSound, NULL);
-	
+
+	MH_CreateHook( CGameServer_PrecacheModel.sig_addr,
+		&HK_CGameServer_PrecacheModel, NULL );
+	MH_CreateHook( CGameServer_PrecacheSound.sig_addr,
+		&HK_CGameServer_PrecacheSound, NULL );
+
 	// Fully initialized!
-	ConColorMsg(Color(255, 0, 255), "Initialized P3IncreasePrecache plugin.\n");
-	ConColorMsg(Color(255, 0, 255), "Enjoy your increased limits!\n");
-	
-	MH_EnableHook(MH_ALL_HOOKS);
-	
+	ConColorMsg( Color( 255, 0, 255 ), "Initialized P3IncreasePrecache plugin.\n" );
+	ConColorMsg( Color( 255, 0, 255 ), "Enjoy your increased limits!\n" );
+
+	MH_EnableHook( MH_ALL_HOOKS );
+
 	return true;
 }
 
 void CEmptyServerPlugin::Unload( void )
 {
-	MH_DisableHook(MH_ALL_HOOKS);
+	MH_DisableHook( MH_ALL_HOOKS );
 	MH_Uninitialize();
 }
