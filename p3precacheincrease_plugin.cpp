@@ -557,7 +557,7 @@ int __fastcall HK_CGameServer_PrecacheSound( CGameServer* gameserver, void*, cha
 		return -1;
 
 	int idx = gameserver->m_pSoundPrecacheTable->AddString( true, name );
-
+#if 0 // Forgot to strip out debugging code out of public
 	char path[MAX_PATH];
 	strcpy_s( path, name );
 	for ( int i = 0; i < 8; i++ )
@@ -565,7 +565,7 @@ int __fastcall HK_CGameServer_PrecacheSound( CGameServer* gameserver, void*, cha
 		strcat_s( path, " " );
 		gameserver->m_pSoundPrecacheTable->AddString( true, path );
 	}
-
+#endif
 	if ( idx == INVALID_STRING_INDEX )
 	{
 		return -1;
