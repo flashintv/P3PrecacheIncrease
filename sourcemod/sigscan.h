@@ -53,6 +53,7 @@ public:
 
 void WriteByte(void* dst, unsigned char src);
 void WriteBytes(void* dst, const void* src, size_t size);
+void RollbackBytes();
  
 /* Sigscanned member functions are casted to member function pointers of this class
    and called with member function pointer syntax */

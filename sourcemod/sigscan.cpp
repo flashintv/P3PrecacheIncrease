@@ -11,6 +11,7 @@
 #endif
  
 #include "sigscan.h"
+#include <vector>
  
 /* There is no ANSI ustrncpy */
 unsigned char* ustrncpy(unsigned char *dest, const unsigned char *src, int len) {
@@ -148,10 +149,30 @@ void* CSigScan::FindSignature(void) {
     return NULL;
 }
 
+struct WrittenByte
+{
+    void* dst;
+    std::vector<unsigned char> original_val;
+
+    WrittenByte( void* sdst, unsigned char src )
+    {
+        dst = sdst;
+        original_val.push_back( src );
+    }
+    WrittenByte( void* sdst, const void* src, size_t size )
+    {
+        dst = sdst;
+        original_val.resize( size );
+        memcpy( original_val.data(), src, size );
+    }
+};
+std::vector<WrittenByte> writtenBytes;
+
 void WriteByte(void* dst, unsigned char src)
 {
     DWORD oldProtect;
     VirtualProtect(dst, 1, PAGE_EXECUTE_READWRITE, &oldProtect);
+    writtenBytes.push_back( { dst, *(unsigned char*)dst } );
     memset(dst, src, 1);
     VirtualProtect(dst, 1, oldProtect, &oldProtect);
 }
@@ -160,6 +181,18 @@ void WriteBytes(void* dst, const void* src, size_t size)
 {
 	DWORD oldProtect;
 	VirtualProtect(dst, size, PAGE_EXECUTE_READWRITE, &oldProtect);
+    writtenBytes.push_back( { dst, src, size } );
 	memcpy(dst, src, size);
 	VirtualProtect(dst, size, oldProtect, &oldProtect);
+}
+
+void RollbackBytes()
+{
+    for ( WrittenByte& byte : writtenBytes )
+    {
+        DWORD oldProtect;
+        VirtualProtect( byte.dst, 1, PAGE_EXECUTE_READWRITE, &oldProtect );
+        memcpy( byte.dst, byte.original_val.data(), byte.original_val.size() );
+        VirtualProtect( byte.dst, 1, oldProtect, &oldProtect );
+    }
 }

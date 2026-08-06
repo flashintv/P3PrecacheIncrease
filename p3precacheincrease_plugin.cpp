@@ -557,6 +557,15 @@ int __fastcall HK_CGameServer_PrecacheSound( CGameServer* gameserver, void*, cha
 		return -1;
 
 	int idx = gameserver->m_pSoundPrecacheTable->AddString( true, name );
+
+	char path[MAX_PATH];
+	strcpy_s( path, name );
+	for ( int i = 0; i < 8; i++ )
+	{
+		strcat_s( path, " " );
+		gameserver->m_pSoundPrecacheTable->AddString( true, path );
+	}
+
 	if ( idx == INVALID_STRING_INDEX )
 	{
 		return -1;
@@ -662,57 +671,71 @@ bool CEmptyServerPlugin::Load( CreateInterfaceFn interfaceFactory, CreateInterfa
 	// ( OLD_MAX_SOUND_INDEX_BITS -> MAX_SOUND_INDEX_BITS )
 	// MAX_SOUND_INDEX_BITS is used to optimize space when sending sound packets, needs to be changed to not overflow!
 	CSigScan SoundInfo_t__WriteDelta;
-	CSigScan SoundInfo_t__ReadDelta1, SoundInfo_t__ReadDelta2, SoundInfo_t__ReadDelta3, SoundInfo_t__ReadDelta4;
+	CSigScan SoundInfo_t__ReadDelta[5];
 
 	SoundInfo_t__WriteDelta.Init(
 		"\x6A\x0D\x50\x8B\xCE\xE8\xCC\xCC\xCC\xCC\x8B\x4F\x44", "xxxxxx????xxx", 13 );
-	SoundInfo_t__ReadDelta1.Init(
+	SoundInfo_t__ReadDelta[0].Init(
 		"\x83\xF9\x0D\x7C\x7C", "xxxxx", 5 );
-	SoundInfo_t__ReadDelta2.Init(
+	SoundInfo_t__ReadDelta[1].Init(
 		"\xBA\x0D\x00\x00\x00\x2B\xD1\x8B\x48\x18\x3B\xCE\x75\x0C\x89\x68\x14\x89\x58\x10\xC6\x40\x04\x01\xEB\x10\x76\x09\xC6\x40\x04\x01\x89\x58\x10\xEB\x0B\x8B\x31\x89\x70\x10\x83\xC1\x04\x89\x48\x18\x38\x58\x04\x74\x0B", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 53 );
-	SoundInfo_t__ReadDelta3.Init(
+	SoundInfo_t__ReadDelta[2].Init(
 		"\x83\xC1\xF3\x3B\xCB\x89\x48\x14\x74\x12", "xxxxxxxxxx", 10 );
-	SoundInfo_t__ReadDelta4.Init(
+	SoundInfo_t__ReadDelta[3].Init(
 		"\xC1\xEA\x0D\x89\x50\x10\x8B\x54\x24\x10", "xxxxxxxxxx", 10 );
+	SoundInfo_t__ReadDelta[4].Init(
+		"\x23\x3D\xCC\xCC\xCC\xCC\x83\xC1\xF3", "xx????xxx", 9 );
 
-	if ( !SoundInfo_t__WriteDelta.is_set || !SoundInfo_t__ReadDelta1.is_set || !SoundInfo_t__ReadDelta2.is_set || !SoundInfo_t__ReadDelta3.is_set || !SoundInfo_t__ReadDelta4.is_set ) {
-		ConColorMsg( Color( 255, 0, 0 ), "Failed to find SoundInfo_t::(Write|Read)Delta signatures!\n" );
-		return false;
-	}
+	if ( !SoundInfo_t__WriteDelta.is_set )
+		for ( int i = 0; i < ARRAYSIZE( SoundInfo_t__ReadDelta ); i++ )
+			if ( !SoundInfo_t__ReadDelta[i].is_set ) {
+				ConColorMsg( Color( 255, 0, 0 ), "Failed to find SoundInfo_t::(Write|Read)Delta signatures!\n" );
+				return false;
+			}
 	WriteByte( (void*)((unsigned long)SoundInfo_t__WriteDelta.sig_addr + 1), MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta1.sig_addr + 2), MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta2.sig_addr + 1), MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta3.sig_addr + 2), -MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta4.sig_addr + 2), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta[0].sig_addr + 2), MAX_SOUND_INDEX_BITS);
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta[1].sig_addr + 1), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta[2].sig_addr + 2), -MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SoundInfo_t__ReadDelta[3].sig_addr + 2), MAX_SOUND_INDEX_BITS );
+
+	unsigned long Bit14IndexMask = *((unsigned long*)((unsigned long)(SoundInfo_t__ReadDelta[4].sig_addr) + 2)) + sizeof( int );
+	WriteBytes( (void*)((unsigned long)SoundInfo_t__ReadDelta[4].sig_addr + 2), &Bit14IndexMask, sizeof( Bit14IndexMask ) );
 
 	// -----------------------------------------------------------------
 	// SVC_Prefetch::WriteToBuffer && SVC_Prefetch::ReadFromBuffer
 	// ( OLD_MAX_SOUND_INDEX_BITS -> MAX_SOUND_INDEX_BITS )
 	// MAX_SOUND_INDEX_BITS is used to optimize space when sending sound packets, needs to be changed to not overflow!
 	CSigScan SVC_Prefetch__WriteToBuffer;
-	CSigScan SVC_Prefetch__ReadFromBuffer1, SVC_Prefetch__ReadFromBuffer2, SVC_Prefetch__ReadFromBuffer3, SVC_Prefetch__ReadFromBuffer4;
+	CSigScan SVC_Prefetch__ReadFromBuffer[5];
 
 	SVC_Prefetch__WriteToBuffer.Init(
 		"\x6A\x0D\x50\x8B\xCF", "xxxxx", 5 );
-	SVC_Prefetch__ReadFromBuffer1.Init(
+	SVC_Prefetch__ReadFromBuffer[0].Init(
 		"\x83\xF9\x0D\x56\x89\x5C\x24\x0C", "xxxxxxxx", 8 );
-	SVC_Prefetch__ReadFromBuffer2.Init(
+	SVC_Prefetch__ReadFromBuffer[1].Init(
 		"\xBA\x0D\x00\x00\x00\x2B\xD1\x8B\x48\x18\x3B\xCE\x57", "xxxxxxxxxxxxx", 13 );
-	SVC_Prefetch__ReadFromBuffer3.Init(
+	SVC_Prefetch__ReadFromBuffer[2].Init(
 		"\x83\xC1\xF3\x3B\xCD", "xxxxx", 5 );
-	SVC_Prefetch__ReadFromBuffer4.Init(
+	SVC_Prefetch__ReadFromBuffer[3].Init(
 		"\xC1\xEA\x0D\x89\x50\x10\x8B\xCE\xE9\xB4\x00\x00\x00", "xxxxxxxxxxxxx", 13 );
+	SVC_Prefetch__ReadFromBuffer[4].Init(
+		"\x23\x35\xCC\xCC\xCC\xCC\x83\xC1\xF3\x3B\xCD", "xx????xxxxx", 11 );
 
-	if ( !SVC_Prefetch__WriteToBuffer.is_set || !SVC_Prefetch__ReadFromBuffer1.is_set || !SVC_Prefetch__ReadFromBuffer2.is_set || !SVC_Prefetch__ReadFromBuffer3.is_set || !SVC_Prefetch__ReadFromBuffer4.is_set ) {
-		ConColorMsg( Color( 255, 0, 0 ), "Failed to find SVC_Prefetch::(WriteTo|ReadFrom)Buffer signatures!\n" );
-		return false;
-	}
+	if ( !SVC_Prefetch__WriteToBuffer.is_set )
+		for ( int i = 0; i < ARRAYSIZE( SVC_Prefetch__ReadFromBuffer ); i++ )
+			if ( !SVC_Prefetch__ReadFromBuffer[i].is_set ) {
+				ConColorMsg( Color( 255, 0, 0 ), "Failed to find SVC_Prefetch::(WriteTo|ReadFrom)Buffer signatures!\n" );
+				return false;
+			}
 	WriteByte( (void*)((unsigned long)SVC_Prefetch__WriteToBuffer.sig_addr + 1), MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer1.sig_addr + 2), MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer2.sig_addr + 1), MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer3.sig_addr + 2), -MAX_SOUND_INDEX_BITS );
-	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer4.sig_addr + 2), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer[0].sig_addr + 2), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer[1].sig_addr + 1), MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer[2].sig_addr + 2), -MAX_SOUND_INDEX_BITS );
+	WriteByte( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer[3].sig_addr + 2), MAX_SOUND_INDEX_BITS );
 
+	// We only need one of the bit 14 index mask address
+	WriteBytes( (void*)((unsigned long)SVC_Prefetch__ReadFromBuffer[4].sig_addr + 2), &Bit14IndexMask, sizeof( Bit14IndexMask ) );
+	
 	// -----------------------------------------------------------------
 	// CreateEngineStringTables signatures and writes
 	CSigScan CGameServer__CreateEngineStringTables_model;
@@ -843,4 +866,6 @@ void CEmptyServerPlugin::Unload( void )
 {
 	MH_DisableHook( MH_ALL_HOOKS );
 	MH_Uninitialize();
+
+	RollbackBytes();
 }
