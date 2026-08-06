@@ -1,7 +1,7 @@
 #ifndef SIGSCAN_H
 #define SIGSCAN_H
 
-#define SIG_STRING_MAX 32
+#define SIG_STRING_MAX 64
 
 class CSigScan {
 private:

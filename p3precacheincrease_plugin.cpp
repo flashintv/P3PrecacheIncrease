@@ -671,9 +671,9 @@ bool CEmptyServerPlugin::Load( CreateInterfaceFn interfaceFactory, CreateInterfa
 	SoundInfo_t__ReadDelta2.Init(
 		"\xBA\x0D\x00\x00\x00\x2B\xD1\x8B\x48\x18\x3B\xCE\x75\x0C\x89\x68\x14\x89\x58\x10\xC6\x40\x04\x01\xEB\x10\x76\x09\xC6\x40\x04\x01\x89\x58\x10\xEB\x0B\x8B\x31\x89\x70\x10\x83\xC1\x04\x89\x48\x18\x38\x58\x04\x74\x0B", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 53 );
 	SoundInfo_t__ReadDelta3.Init(
-		"\x83\xC1\xF3\x3B\xCB\x89\x48\x14\x74\x12", "xxxxxxxxxx", 12 );
+		"\x83\xC1\xF3\x3B\xCB\x89\x48\x14\x74\x12", "xxxxxxxxxx", 10 );
 	SoundInfo_t__ReadDelta4.Init(
-		"\xC1\xEA\x0D\x89\x50\x10\x8B\x54\x24\x10", "xxxxxxxxxx", 12 );
+		"\xC1\xEA\x0D\x89\x50\x10\x8B\x54\x24\x10", "xxxxxxxxxx", 10 );
 
 	if ( !SoundInfo_t__WriteDelta.is_set || !SoundInfo_t__ReadDelta1.is_set || !SoundInfo_t__ReadDelta2.is_set || !SoundInfo_t__ReadDelta3.is_set || !SoundInfo_t__ReadDelta4.is_set ) {
 		ConColorMsg( Color( 255, 0, 0 ), "Failed to find SoundInfo_t::(Write|Read)Delta signatures!\n" );
